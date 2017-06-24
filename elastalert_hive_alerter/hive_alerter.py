@@ -12,7 +12,7 @@ class HiveAlerter(Alerter):
     Use matched data to create alerts containing observables in an instance of TheHive
     """
 
-    required_options = set(['hive_connection'])
+    required_options = set(['hive_connection', 'hive_alert_config'])
 
     def alert(self, matches):
 

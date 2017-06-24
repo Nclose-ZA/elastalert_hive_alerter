@@ -35,15 +35,14 @@ The alert can be configured by providing parameters consumed by TheHive4Py:
 
 hive_alert_config:
   title: 'Sample Title'
+  type: 'external'
+  source: 'instance1'
   description: 'Sample description'
   severity: 2
   tags: ['sample_tag_1', 'sample_tag_2']
   tlp: 3
   status: 'New'
-  type: 'external'
-  source: 'instance1'
   follow: True
-
 
 Included fields can be mapped to TheHive observable types either directly or using python string formatting:
 
