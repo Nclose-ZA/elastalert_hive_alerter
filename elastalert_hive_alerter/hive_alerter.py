@@ -50,5 +50,7 @@ class HiveAlerter(Alerter):
 
     def get_info(self):
 
-        return {'type': 'TheHive Alerter',
-                'hive_host': self.rule.get('hive_connection', {}).get('hive_host', '')}
+        return {
+            'type': 'HiveAlerter',
+            'hive_host': self.rule.get('hive_connection', {}).get('hive_host', '')
+        }

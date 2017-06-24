@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from mock import patch, MagicMock
+from mock import patch
 from unittest import TestCase
 
 
