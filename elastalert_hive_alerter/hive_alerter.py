@@ -44,6 +44,14 @@ class HiveAlerter(Alerter):
             for alert_config_field, alert_config_value in alert_config.iteritems():
                 if isinstance(alert_config_value, basestring):
                     alert_config[alert_config_field] = alert_config_value.format(**context)
+                elif isinstance(alert_config_value, (list, tuple)):
+                    formatted_list = []
+                    for element in alert_config_value:
+                        try:
+                            formatted_list.append(element.format(**context))
+                        except:
+                            formatted_list.append(element)
+                    alert_config[alert_config_field] = formatted_list
 
             alert = Alert(**alert_config)
 

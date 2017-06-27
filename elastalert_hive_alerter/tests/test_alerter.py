@@ -28,7 +28,7 @@ class TestAlerter(TestCase):
                 'status': 'New',
                 'tlp': 3,
                 'severity': 2,
-                'tags': ['TheHive4Py', 'sample'],
+                'tags': ['TheHive4Py', 'sample {rule[name]}'],
                 'source': 'instance1',
                 'follow': True,
                 'type': 'external',
@@ -80,7 +80,7 @@ class TestAlerter(TestCase):
                 source=u'instance1',
                 sourceRef='123456',
                 status=u'New',
-                tags=[u'TheHive4Py', u'sample'],
+                tags=[u'TheHive4Py', u'sample test_rule_name'],
                 title=u'test_index_test_rule_name',
                 tlp=3,
                 type=u'external'
