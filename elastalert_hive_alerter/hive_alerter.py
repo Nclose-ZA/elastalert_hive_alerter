@@ -24,22 +24,26 @@ class HiveAlerter(Alerter):
             connection_details.get('hive_proxies', {'http': '', 'https': ''}))
 
         for match in matches:
+            context = {'rule': self.rule, 'match': match}
+
             artifacts = []
             for mapping in self.rule.get('hive_observable_data_mapping', []):
                 for observable_type, match_data_key in mapping.iteritems():
-                    if match_data_key in match:
-                        artifacts.append(AlertArtifact(dataType=observable_type, data=match[match_data_key]))
-                    else:
-                        try:
-                            artifacts.append(AlertArtifact(dataType=observable_type, data=match_data_key.format(**match)))
-                        except KeyError:
-                            raise KeyError('\nformat string\n{}\nmatch data\n{}'.format(match_data_key, match))
+                    try:
+                        artifacts.append(AlertArtifact(dataType=observable_type, data=match_data_key.format(**context)))
+                    except KeyError:
+                        raise KeyError('\nformat string\n{}\nmatch data\n{}'.format(match_data_key, context))
 
-            alert_config = self.rule.get('hive_alert_config', {})
+            alert_config = {
+                'artifacts': artifacts,
+                'sourceRef': str(uuid.uuid4())[0:6],
+                'title': '{rule[index]}_{rule[name]}'.format(**context)
+            }
+            alert_config.update(self.rule.get('hive_alert_config', {}))
 
-            alert_config['artifacts'] = artifacts
-            if 'sourceRef' not in alert_config:
-                alert_config['sourceRef'] = str(uuid.uuid4())[0:6]
+            for alert_config_field, alert_config_value in alert_config.iteritems():
+                if isinstance(alert_config_value, basestring):
+                    alert_config[alert_config_field] = alert_config_value.format(**context)
 
             alert = Alert(**alert_config)
 

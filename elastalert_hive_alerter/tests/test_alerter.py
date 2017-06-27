@@ -9,11 +9,13 @@ class TestAlerter(TestCase):
     def test_alerter(self):
 
         rule = {
+            'index': 'test_index',
+            'name': 'test_rule_name',
             'hive_observable_data_mapping': [
-                {'filename': '{domain}_{ip_address}.txt'},
-                {'domain': 'domain'},
-                {'domain': 'some_other_domain'},
-                {'ip': 'ip_address'}
+                {'filename': '{match[domain]}_{match[ip_address]}.txt'},
+                {'domain': '{match[domain]}'},
+                {'domain': '{match[some_other_domain]}'},
+                {'ip': '{match[ip_address]}'}
             ],
             'hive_connection': {
                 'hive_password': 'password',
@@ -27,11 +29,10 @@ class TestAlerter(TestCase):
                 'tlp': 3,
                 'severity': 2,
                 'tags': ['TheHive4Py', 'sample'],
-                'title': 'Test Title',
                 'source': 'instance1',
                 'follow': True,
                 'type': 'external',
-                'description': 'Test desc'
+                'description': '{rule[name]} {match[domain]} Test desc'
             }
         }
 
@@ -73,14 +74,14 @@ class TestAlerter(TestCase):
             mock_artifact.assert_any_call(data=u'1.1.1.1', dataType=u'ip')
             mock_alert.assert_called_with(
                 artifacts=[u'fake_artifact_return' for i in xrange(4)],
-                description=u'Test desc',
+                description=u'test_rule_name test.com Test desc',
                 follow=True,
                 severity=2,
                 source=u'instance1',
                 sourceRef='123456',
                 status=u'New',
                 tags=[u'TheHive4Py', u'sample'],
-                title=u'Test Title',
+                title=u'test_index_test_rule_name',
                 tlp=3,
                 type=u'external'
             )
