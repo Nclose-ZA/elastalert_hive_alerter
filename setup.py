@@ -4,7 +4,7 @@ setup(
       name='elastalert_hive_alerter',
       version='1.0.0rc2',
       description='Custom Elastalert Alerter which creates TheHive alerts',
-      url='',
+      url='https://github.com/Nclose-ZA/elastalert_hive_alerter',
       author='Daniel Browne',
       author_email='grimsqueaker13@gmail.com',
       license='MIT',
