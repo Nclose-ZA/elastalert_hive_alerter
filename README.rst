@@ -26,7 +26,7 @@ Use this package as the alert type:
 
  alert: "elastalert_hive_alerter.hive_alerter.HiveAlerter"
 
-You will be required to provide connection details for TheHive (required fields first):
+You will be required to configure connection details for TheHive (required fields first) into the Elastalert config file, example below:
 
 ::
 
