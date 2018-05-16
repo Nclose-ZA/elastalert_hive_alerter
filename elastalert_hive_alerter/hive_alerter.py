@@ -17,11 +17,13 @@ class HiveAlerter(Alerter):
     def alert(self, matches):
 
         connection_details = self.rule['hive_connection']
+
         api = TheHiveApi(
             '{hive_host}:{hive_port}'.format(**connection_details),
             '{hive_username}'.format(**connection_details),
-            '{hive_password}'.format(**connection_details),
-            connection_details.get('hive_proxies', {'http': '', 'https': ''}))
+            password=connection_details.get('hive_password', None),
+            proxies=connection_details.get('hive_proxies', {'http': '', 'https': ''}),
+            cert=connection_details.get('hive_verify', False))
 
         for match in matches:
             context = {'rule': self.rule, 'match': match}
@@ -30,7 +32,8 @@ class HiveAlerter(Alerter):
             for mapping in self.rule.get('hive_observable_data_mapping', []):
                 for observable_type, match_data_key in mapping.iteritems():
                     try:
-                        artifacts.append(AlertArtifact(dataType=observable_type, data=match_data_key.format(**context)))
+                        if match_data_key.replace("{match[","").replace("]}","") in context['match']:
+                            artifacts.append(AlertArtifact(dataType=observable_type, data=match_data_key.format(**context)))
                     except KeyError:
                         raise KeyError('\nformat string\n{}\nmatch data\n{}'.format(match_data_key, context))
 
