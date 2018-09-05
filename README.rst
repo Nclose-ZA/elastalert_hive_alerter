@@ -33,9 +33,8 @@ You will be required to configure connection details for TheHive (required field
  hive_connection:
    hive_host: http(s)://sample_host
    hive_port: <hive_port>
-   hive_username: <hive_username>
-   hive_password: <hive_password>
-
+   hive_apikey: <hive_apikey>
+	
    hive_proxies:
      http: ''
      https: ''
