@@ -40,7 +40,7 @@ class HiveAlerter(Alerter):
             alert_config = {
                 'artifacts': artifacts,
                 'sourceRef': str(uuid.uuid4())[0:6],
-                'title': '{rule[index]}_{rule[name]}'.format(**context)
+                'title': '{rule[name]}'.format(**context)
             }
             alert_config.update(self.rule.get('hive_alert_config', {}))
 
