@@ -15,7 +15,8 @@ class TestAlerter(TestCase):
                 {'filename': '{match[domain]}_{match[ip_address]}.txt'},
                 {'domain': '{match[domain]}'},
                 {'domain': '{match[some_other_domain]}'},
-                {'ip': '{match[ip_address]}'}
+                {'ip': '{match[ip_address]}'},
+                {'domain': '{match[nested1][nested2]}'},
             ],
             'hive_connection': {
                 'hive_password': 'password',
@@ -40,7 +41,8 @@ class TestAlerter(TestCase):
             {
                 'ip_address': '1.1.1.1',
                 'domain': 'test.com',
-                'some_other_domain': 'test2.com'
+                'some_other_domain': 'test2.com',
+                'nested1': {'nested2': 'nested_value'}
             }
         ]
 
@@ -63,17 +65,18 @@ class TestAlerter(TestCase):
 
             mock_api.assert_called_with(
                 u'http://test_host:9000',
-                u'username',
-                u'password',
-                {u'http': u'', u'https': u''}
+                u'',
+                cert=False,
+                proxies={u'http': u'', u'https': u''}
             )
 
             mock_artifact.assert_any_call(data=u'test.com_1.1.1.1.txt', dataType=u'filename')
             mock_artifact.assert_any_call(data=u'test.com', dataType=u'domain')
             mock_artifact.assert_any_call(data=u'test2.com', dataType=u'domain')
+            mock_artifact.assert_any_call(data=u'nested_value', dataType=u'domain')
             mock_artifact.assert_any_call(data=u'1.1.1.1', dataType=u'ip')
             mock_alert.assert_called_with(
-                artifacts=[u'fake_artifact_return' for i in xrange(4)],
+                artifacts=[u'fake_artifact_return' for i in xrange(len(rule['hive_observable_data_mapping']))],
                 description=u'test_rule_name test.com Test desc',
                 follow=True,
                 severity=2,
@@ -81,7 +84,7 @@ class TestAlerter(TestCase):
                 sourceRef='123456',
                 status=u'New',
                 tags=[u'TheHive4Py', u'sample test_rule_name'],
-                title=u'test_index_test_rule_name',
+                title=u'test_rule_name',
                 tlp=3,
                 type=u'external'
             )
