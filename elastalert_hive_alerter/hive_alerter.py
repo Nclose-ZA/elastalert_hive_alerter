@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import re
 import uuid
 
 from elastalert.alerts import Alerter
@@ -31,7 +32,8 @@ class HiveAlerter(Alerter):
             for mapping in self.rule.get('hive_observable_data_mapping', []):
                 for observable_type, match_data_key in mapping.iteritems():
                     try:
-                        if match_data_key.replace("{match[","").replace("]}","") in context['match']:
+                        match_data_keys = re.findall(r'\{match\[([^\]]*)\]', match_data_key)
+                        if all([True for k in match_data_keys if k in context['match']]):
                             artifacts.append(AlertArtifact(dataType=observable_type, data=match_data_key.format(**context)))
                     except KeyError:
                         raise KeyError('\nformat string\n{}\nmatch data\n{}'.format(match_data_key, context))
