@@ -5,7 +5,7 @@ import uuid
 
 from elastalert.alerts import Alerter
 from thehive4py.api import TheHiveApi
-from thehive4py.models import Alert, AlertArtifact
+from thehive4py.models import Alert, AlertArtifact, CustomFieldHelper
 
 
 class HiveAlerter(Alerter):
@@ -46,7 +46,17 @@ class HiveAlerter(Alerter):
             alert_config.update(self.rule.get('hive_alert_config', {}))
 
             for alert_config_field, alert_config_value in alert_config.iteritems():
-                if isinstance(alert_config_value, basestring):
+                if alert_config_field == 'customFields':
+                    custom_fields = CustomFieldHelper()
+                    for cf_key, cf_value in alert_config_value.iteritems():
+                        try:
+                            func = getattr(custom_fields, 'add_{}'.format(cf_value['type']))
+                        except AttributeError:
+                            raise Exception('unsupported custom field type {}'.format(cf_value['type']))
+                        value = cf_value['value'].format(**context)
+                        func(cf_key, value)
+                    alert_config[alert_config_field] = custom_fields.build()
+                elif isinstance(alert_config_value, basestring):
                     alert_config[alert_config_field] = alert_config_value.format(**context)
                 elif isinstance(alert_config_value, (list, tuple)):
                     formatted_list = []
