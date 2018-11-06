@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from mock import patch
+import time
 from unittest import TestCase
 
 
@@ -33,16 +34,26 @@ class TestAlerter(TestCase):
                 'source': 'instance1',
                 'follow': True,
                 'type': 'external',
-                'description': '{rule[name]} {match[domain]} Test desc'
+                'description': '{rule[name]}\n{match[domain]} Test desc',
+                'customFields': {
+                    'test_date': {'type': 'date', 'value': '{match[a_date]}'},
+                    'test_string': {'type': 'string', 'value': '{match[some_other_domain]}'},
+                    'test_boolean': {'type': 'boolean', 'value': '{match[a_boolean]}'},
+                    'test_number': {'type': 'number', 'value': '{match[a_number]}'}
+                }
             }
         }
 
+        a_date = int(time.time())*1000
         matches = [
             {
                 'ip_address': '1.1.1.1',
                 'domain': 'test.com',
                 'some_other_domain': 'test2.com',
-                'nested1': {'nested2': 'nested_value'}
+                'nested1': {'nested2': 'nested_value'},
+                'a_boolean': True,
+                'a_date': a_date,
+                'a_number': 123
             }
         ]
 
@@ -77,7 +88,7 @@ class TestAlerter(TestCase):
             mock_artifact.assert_any_call(data=u'1.1.1.1', dataType=u'ip')
             mock_alert.assert_called_with(
                 artifacts=[u'fake_artifact_return' for i in xrange(len(rule['hive_observable_data_mapping']))],
-                description=u'test_rule_name test.com Test desc',
+                description=u'test_rule_name\ntest.com Test desc',
                 follow=True,
                 severity=2,
                 source=u'instance1',
@@ -86,5 +97,11 @@ class TestAlerter(TestCase):
                 tags=[u'TheHive4Py', u'sample test_rule_name'],
                 title=u'test_rule_name',
                 tlp=3,
-                type=u'external'
+                type=u'external',
+                customFields={
+                    u'test_number': {'order': 0, 'number': '123'},
+                    u'test_boolean': {'order': 1, 'boolean': u'True'},
+                    u'test_date': {'order': 2, 'date': unicode(a_date)},
+                    u'test_string': {'order': 3, 'string': u'test2.com'}
+                }
             )
