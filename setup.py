@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
       name='elastalert_hive_alerter',
-      version='1.0.0rc2',
+      version='1.1.0',
       description='Custom Elastalert Alerter which creates TheHive alerts',
       url='https://github.com/Nclose-ZA/elastalert_hive_alerter',
       author='Daniel Browne',
