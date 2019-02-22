@@ -29,7 +29,10 @@ def _process_hive_match(rule, match):
         for observable_type, match_data_key in mapping.iteritems():
             try:
                 match_data_keys = re.findall(r'\{match\[([^\]]*)\]', match_data_key)
-                if all([True for k in match_data_keys if k in context['match']]):
+                rule_data_keys = re.findall(r'\{rule\[([^\]]*)\]', match_data_key)
+                data_keys = match_data_keys + rule_data_keys
+                context_keys = context['match'].keys() + context['rule'].keys()
+                if all([True for k in data_keys if k in context_keys]):
                     artifacts.append(AlertArtifact(dataType=observable_type, data=match_data_key.format(**context)))
             except KeyError:
                 raise KeyError('\nformat string\n{}\nmatch data\n{}'.format(match_data_key, context))
@@ -66,10 +69,6 @@ def _process_hive_match(rule, match):
     return alert_config
 
 
-class AlertHash(Document):
-    alert_hash = Keyword()
-
-
 class HashSuppressorEnhancement(BaseEnhancement):
 
     required_options = set(['es_suppression_hashes_connection'])  # This is not currently used, just informational
@@ -100,23 +99,30 @@ class HashSuppressorEnhancement(BaseEnhancement):
             'timeout': connection_details.get('es_conn_timeout', 20)
         })
 
-        connections.create_connection(**kwargs)
+        class AlertHash(Document):
+            alert_hash = Keyword()
 
+        connections.create_connection(**kwargs)
         alert_hashes = Index(connection_details.get('index', 'alert_hashes'))
         alert_hashes.document(AlertHash)
-
         if not alert_hashes.exists():
             alert_hashes.create()
 
         alert_config = _process_hive_match(self.rule, match)
-        alert_hash_string = '|'.join([observable.jsonify() for observable in alert_config['artifacts']])
-        alert_hash = hashlib.md5(alert_hash_string).hexdigest()
-        results = AlertHash.search().filter('term', alert_hash=alert_hash).execute(ignore_cache=True)
+        # The jsonify method provides a list of predictably sorted JSON strings which we then sort in order to make
+        #   sure that the we generate the same hash that was written to the database by ObservableHashCreator
+        observables = sorted([observable.jsonify() for observable in alert_config['artifacts']])
+        observable_hash_string = '|'.join(observables)
+        observable_hash = hashlib.md5(observable_hash_string).hexdigest()
+        results = AlertHash.search().filter('term', alert_hash=observable_hash).execute(ignore_cache=True)
 
         if results:
             elastalert_logger.info('Alert [{}] was not sent because hash [{}] was found'.format(
-                alert_hash_string, alert_hash))
+                observable_hash_string, observable_hash))
             raise DropMatchException()
+        else:
+            elastalert_logger.info('Alert [{}] was sent because hash [{}] was not found'.format(
+                observable_hash_string, observable_hash))
 
 
 class HiveAlerter(Alerter):
