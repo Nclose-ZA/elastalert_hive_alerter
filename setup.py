@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
       name='elastalert_hive_alerter',
       version='1.1.0',
-      description='Custom Elastalert Alerter which creates TheHive alerts',
+      description='Elastalert alerter which creates TheHive alerts & enhancement which can suppress alerts',
       url='https://github.com/Nclose-ZA/elastalert_hive_alerter',
       author='Daniel Browne',
       author_email='grimsqueaker13@gmail.com',
@@ -15,7 +15,7 @@ setup(
       ],
       keywords='elasticsearch elastalert thehive',
       packages=['elastalert_hive_alerter'],
-      install_requires=['elastalert', 'thehive4py'],
+      install_requires=['elastalert', 'thehive4py', 'elasticsearch_dsl'],
       test_suite='nose.collector',
       tests_require=['nose']
 )
