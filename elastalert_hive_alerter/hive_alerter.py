@@ -117,12 +117,10 @@ class HashSuppressorEnhancement(BaseEnhancement):
         results = AlertHash.search().filter('term', alert_hash=observable_hash).execute(ignore_cache=True)
 
         if results:
-            elastalert_logger.info('Alert [{}] was not sent because hash [{}] was found'.format(
-                observable_hash_string, observable_hash))
+            elastalert_logger.info('Alert was not sent because hash [{}] was found'.format(observable_hash))
             raise DropMatchException()
         else:
-            elastalert_logger.info('Alert [{}] was sent because hash [{}] was not found'.format(
-                observable_hash_string, observable_hash))
+            elastalert_logger.info('Alert was sent because hash [{}] was not found'.format(observable_hash))
 
 
 class HiveAlerter(Alerter):
