@@ -18,6 +18,7 @@ class TestAlerter(TestCase):
                 {'domain': '{match[some_other_domain]}'},
                 {'ip': '{match[ip_address]}'},
                 {'domain': '{match[nested1][nested2]}'},
+                {'other': '{match[NotInMatchData]}'}
             ],
             'hive_connection': {
                 'hive_password': 'password',
@@ -87,7 +88,7 @@ class TestAlerter(TestCase):
             mock_artifact.assert_any_call(data=u'nested_value', dataType=u'domain')
             mock_artifact.assert_any_call(data=u'1.1.1.1', dataType=u'ip')
             mock_alert.assert_called_with(
-                artifacts=[u'fake_artifact_return' for i in xrange(len(rule['hive_observable_data_mapping']))],
+                artifacts=[u'fake_artifact_return' for i in xrange(len(rule['hive_observable_data_mapping'])-1)],
                 description=u'test_rule_name\ntest.com Test desc',
                 follow=True,
                 severity=2,
