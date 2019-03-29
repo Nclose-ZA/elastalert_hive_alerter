@@ -85,7 +85,7 @@ class HashSuppressorEnhancement(BaseEnhancement):
         kwargs = {}
 
         if connection_details.get('es_host'):
-            kwargs['hosts'] = [{connection_details['es_host']: connection_details.get('es_port', 9200)}]
+            kwargs['hosts'] = ['{}:{}'.format(connection_details['es_host'], connection_details.get('es_port', 9200))]
 
         if connection_details.get('es_username'):
             kwargs['http_auth'] = (connection_details['es_username'], connection_details['es_password'])
