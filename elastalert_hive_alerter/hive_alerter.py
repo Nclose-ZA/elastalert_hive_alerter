@@ -36,7 +36,7 @@ class HiveAlerter(Alerter):
         alert_config = {
             'artifacts': self.create_artifacts(match),
             'sourceRef': str(uuid.uuid4())[0:6],
-            'title': '{rule[index]}_{rule[name]}'.format(**context)
+            'title': '{rule[name]}'.format(**context)
         }
 
         alert_config.update(self.rule.get('hive_alert_config', {}))
@@ -51,7 +51,6 @@ class HiveAlerter(Alerter):
                         raise Exception('unsupported custom field type {}'.format(cf_value['type']))
                     value = cf_value['value'].format(**context)
                     func(cf_key, value)
-                print(custom_fields.build())
                 alert_config[alert_config_field] = custom_fields.build()
             elif isinstance(alert_config_value, basestring):
                 alert_config[alert_config_field] = alert_config_value.format(**context)
@@ -68,7 +67,6 @@ class HiveAlerter(Alerter):
 
     def send_to_thehive(self, alert_config):
         connection_details = self.rule['hive_connection']
-
         api = TheHiveApi(
             '{hive_host}:{hive_port}'.format(**connection_details),
             connection_details.get('hive_apikey', ''),
