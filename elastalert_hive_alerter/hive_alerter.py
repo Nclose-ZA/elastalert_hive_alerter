@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 import uuid
 
 from elastalert.alerts import Alerter
@@ -17,18 +17,18 @@ class HiveAlerter(Alerter):
     def get_aggregation_summary_text(self, matches):
         text = super(HiveAlerter, self).get_aggregation_summary_text(matches)
         if text:
-            text = u'```\n{0}```\n'.format(text)
+            text = '```\n{0}```\n'.format(text)
         return text
 
     def create_artifacts(self, match):
         artifacts = []
         context = {'rule': self.rule, 'match': match}
         for mapping in self.rule.get('hive_observable_data_mapping', []):
-            for observable_type, match_data_key in mapping.iteritems():
+            for observable_type, match_data_key in mapping.items():
                 try:
                     artifacts.append(AlertArtifact(dataType=observable_type, data=match_data_key.format(**context)))
                 except KeyError as e:
-                    print('format string {} fail cause no key {} in {}'.format(e, match_data_key, context))
+                    print(('format string {} fail cause no key {} in {}'.format(e, match_data_key, context)))
         return artifacts
 
     def create_alert_config(self, match):
@@ -41,10 +41,10 @@ class HiveAlerter(Alerter):
 
         alert_config.update(self.rule.get('hive_alert_config', {}))
 
-        for alert_config_field, alert_config_value in alert_config.iteritems():
+        for alert_config_field, alert_config_value in alert_config.items():
             if alert_config_field == 'customFields':
                 custom_fields = CustomFieldHelper()
-                for cf_key, cf_value in alert_config_value.iteritems():
+                for cf_key, cf_value in alert_config_value.items():
                     try:
                         func = getattr(custom_fields, 'add_{}'.format(cf_value['type']))
                     except AttributeError:
@@ -52,7 +52,7 @@ class HiveAlerter(Alerter):
                     value = cf_value['value'].format(**context)
                     func(cf_key, value)
                 alert_config[alert_config_field] = custom_fields.build()
-            elif isinstance(alert_config_value, basestring):
+            elif isinstance(alert_config_value, str):
                 alert_config[alert_config_field] = alert_config_value.format(**context)
             elif isinstance(alert_config_value, (list, tuple)):
                 formatted_list = []
