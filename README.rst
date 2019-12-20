@@ -64,6 +64,6 @@ If desired, matched data fields can be mapped to TheHive observable types using 
    - domain: "{match[field]}"
    - ip: "{match[ip_field]}"
 
-## Additional Documentation:
-
+Additional Documentation
+--------------------------------
 https://elastalert.readthedocs.io/en/latest/ruletypes.html#thehive
