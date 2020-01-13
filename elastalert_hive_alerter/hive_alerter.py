@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 import hashlib
 import logging
 import re
@@ -15,18 +14,13 @@ from thehive4py.models import Alert, AlertArtifact, CustomFieldHelper
 elastalert_logger = logging.getLogger('elastalert')
 
 
-def _process_hive_match(rule, match):
-    """
-    This function processes a match which can raise an alert in TheHive
-    It is used by both HiveAlerter and HashSuppressorEnhancement as the enhancement needs to be able to derive the
-        same observable data from the alert as the alerter
-    """
+def _create_artifacts(rule, match):
 
     context = {'rule': rule, 'match': match}
 
     artifacts = []
     for mapping in rule.get('hive_observable_data_mapping', []):
-        for observable_type, match_data_key in mapping.iteritems():
+        for observable_type, match_data_key in mapping.items():
             try:
                 match_data_keys = re.findall(r'\{match\[([^\]]*)\]', match_data_key)
                 rule_data_keys = re.findall(r'\{rule\[([^\]]*)\]', match_data_key)
@@ -34,20 +28,28 @@ def _process_hive_match(rule, match):
                 context_keys = context['match'].keys() + context['rule'].keys()
                 if all([True if k in context_keys else False for k in data_keys]):
                     artifacts.append(AlertArtifact(dataType=observable_type, data=match_data_key.format(**context)))
-            except KeyError:
-                raise KeyError('\nformat string\n{}\nmatch data\n{}'.format(match_data_key, context))
+            except KeyError as e:
+                print('format string failed for key {}\nformat string\n{}\ncontext\n{}'.format(
+                    e, match_data_key, context))
+    return artifacts
+
+
+def _create_alert_config(rule, match):
+
+    context = {'rule': rule, 'match': match}
 
     alert_config = {
-        'artifacts': artifacts,
+        'artifacts': _create_artifacts(rule, match),
         'sourceRef': str(uuid.uuid4())[0:6],
         'title': '{rule[name]}'.format(**context)
     }
+
     alert_config.update(rule.get('hive_alert_config', {}))
 
-    for alert_config_field, alert_config_value in alert_config.iteritems():
+    for alert_config_field, alert_config_value in alert_config.items():
         if alert_config_field == 'customFields':
             custom_fields = CustomFieldHelper()
-            for cf_key, cf_value in alert_config_value.iteritems():
+            for cf_key, cf_value in alert_config_value.items():
                 try:
                     func = getattr(custom_fields, 'add_{}'.format(cf_value['type']))
                 except AttributeError:
@@ -55,14 +57,14 @@ def _process_hive_match(rule, match):
                 value = cf_value['value'].format(**context)
                 func(cf_key, value)
             alert_config[alert_config_field] = custom_fields.build()
-        elif isinstance(alert_config_value, basestring):
+        elif isinstance(alert_config_value, str):
             alert_config[alert_config_field] = alert_config_value.format(**context)
         elif isinstance(alert_config_value, (list, tuple)):
             formatted_list = []
             for element in alert_config_value:
                 try:
                     formatted_list.append(element.format(**context))
-                except:
+                except (AttributeError, KeyError, IndexError):
                     formatted_list.append(element)
             alert_config[alert_config_field] = formatted_list
 
@@ -108,7 +110,7 @@ class HashSuppressorEnhancement(BaseEnhancement):
         if not alert_hashes.exists():
             alert_hashes.create()
 
-        alert_config = _process_hive_match(self.rule, match)
+        alert_config = _create_alert_config(self.rule, match)
         # The jsonify method provides a list of predictably sorted JSON strings which we then sort in order to make
         #   sure that the we generate the same hash that was written to the database by ObservableHashCreator
         observables = sorted([observable.jsonify() for observable in alert_config['artifacts']])
@@ -130,27 +132,48 @@ class HiveAlerter(Alerter):
 
     required_options = set(['hive_connection', 'hive_alert_config'])
 
-    def alert(self, matches):
+    def get_aggregation_summary_text(self, matches):
+        text = super(HiveAlerter, self).get_aggregation_summary_text(matches)
+        if text:
+            text = '```\n{0}```\n'.format(text)
+        return text
 
+    def send_to_thehive(self, alert_config):
         connection_details = self.rule['hive_connection']
-
         api = TheHiveApi(
             '{hive_host}:{hive_port}'.format(**connection_details),
-            connection_details.get('hive_apikey',''),
+            connection_details.get('hive_apikey', ''),
             proxies=connection_details.get('hive_proxies', {'http': '', 'https': ''}),
             cert=connection_details.get('hive_verify', False))
 
-        for match in matches:
-            alert_config = _process_hive_match(self.rule, match)
-            alert = Alert(**alert_config)
-            response = api.create_alert(alert)
+        alert = Alert(**alert_config)
+        response = api.create_alert(alert)
 
-            if response.status_code != 201:
-                raise Exception('alert not successfully created in TheHive\n{}'.format(response.text))
+        if response.status_code != 201:
+            raise Exception('alert not successfully created in TheHive\n{}'.format(response.text))
+
+    def alert(self, matches):
+        if self.rule.get('hive_alert_config_type', 'custom') != 'classic':
+            for match in matches:
+                alert_config = _create_alert_config(self.rule, match)
+                self.send_to_thehive(alert_config)
+        else:
+            alert_config = _create_alert_config(self.rule, matches[0])
+            artifacts = []
+            for match in matches:
+                artifacts += _create_artifacts(self.rule, match)
+                if 'related_events' in match:
+                    for related_event in match['related_events']:
+                        artifacts += _create_artifacts(self.rule, related_event)
+
+            alert_config['artifacts'] = artifacts
+            alert_config['title'] = self.create_title(matches)
+            alert_config['description'] = self.create_alert_body(matches)
+            self.send_to_thehive(alert_config)
 
     def get_info(self):
 
         return {
-            'type': 'HiveAlerter',
+            'type': 'hivealerter',
             'hive_host': self.rule.get('hive_connection', {}).get('hive_host', '')
         }
