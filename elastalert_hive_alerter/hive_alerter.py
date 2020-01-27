@@ -25,7 +25,7 @@ def _create_artifacts(rule, match):
                 match_data_keys = re.findall(r'\{match\[([^\]]*)\]', match_data_key)
                 rule_data_keys = re.findall(r'\{rule\[([^\]]*)\]', match_data_key)
                 data_keys = match_data_keys + rule_data_keys
-                context_keys = context['match'].keys() + context['rule'].keys()
+                context_keys = list(context['match'].keys()) + list(context['rule'].keys())
                 if all([True if k in context_keys else False for k in data_keys]):
                     artifacts.append(AlertArtifact(dataType=observable_type, data=match_data_key.format(**context)))
             except KeyError as e:
