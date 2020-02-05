@@ -8,7 +8,13 @@ from elastalert.alerts import Alerter
 from elastalert.enhancements import BaseEnhancement, DropMatchException
 from elasticsearch_dsl import connections, Document, Keyword, Index
 from thehive4py.api import TheHiveApi
-from thehive4py.models import Alert, AlertArtifact, CustomFieldHelper
+from thehive4py.models import Alert, AlertArtifact, CustomFieldHelper, JSONSerializable, CustomJsonEncoder
+
+
+# Monkey patch jsonify as the indent keyword results in different hashes between python 2 & 3
+def jsonify(self):
+    return json.dumps(self, sort_keys=True, cls=CustomJsonEncoder)
+JSONSerializable.jsonify = jsonify
 
 
 elastalert_logger = logging.getLogger('elastalert')
@@ -114,8 +120,8 @@ class HashSuppressorEnhancement(BaseEnhancement):
         # The jsonify method provides a list of predictably sorted JSON strings which we then sort in order to make
         #   sure that the we generate the same hash that was written to the database by ObservableHashCreator
         observables = sorted([observable.jsonify() for observable in alert_config['artifacts']])
-        observable_hash_string = '|'.join(observables)
-        observable_hash = hashlib.md5(observable_hash_string).hexdigest()
+        observable_hash_string = u'|'.join(observables)
+        observable_hash = hashlib.md5(observable_hash_string.encode('utf-8')).hexdigest()
         results = AlertHash.search().filter('term', alert_hash=observable_hash).execute(ignore_cache=True)
 
         if results:
