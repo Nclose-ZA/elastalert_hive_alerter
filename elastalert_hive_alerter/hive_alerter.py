@@ -3,6 +3,7 @@ import hashlib
 import logging
 import re
 import uuid
+import json
 
 from elastalert.alerts import Alerter
 from elastalert.enhancements import BaseEnhancement, DropMatchException
