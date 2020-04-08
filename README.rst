@@ -27,13 +27,13 @@ Note: It is possible to place static configuration such as *hive_connection* or 
 
 ::
 
- 1. wget https://github.com/Yelp/elastalert/archive/v0.2.1.tar.gz -O - | sudo tar -xz -C /opt/elastalert # Download a stable release from the Elastalert repository and place it in whichever directory you wish. We will use /opt/elastalert for this demostration.
+ 1. wget https://github.com/Yelp/elastalert/archive/v0.2.1.tar.gz -O - | sudo tar -xz -C /opt/ # Download a stable release from the Elastalert repository and place it in whichever directory you wish. We will use /opt/ for this demostration.
  2. sudo apt-get install python3.6-venv  # Install a virtual enviroment
- 3. cd /opt/elastalert && python3.6 -m venv venv #  Create a virtual environment within the project directory
+ 3. cd /opt/elastalert{version} && python3.6 -m venv venv #  Create a virtual environment within the project directory
  4. . /opt/elastalert/venv/bin/activate #  Activate the virtual environment
  5. python setup.py install #  Install the provided Python package
- 5. git clone https://github.com/Nclose-ZA/elastalert_hive_alerter.git #  Clone the Nclose Hive Alerter master branch
- 5. python elastalert_hive_alerter/setup.py install #  Install the Nclose Hive Alerter python package
+ 6. git clone https://github.com/Nclose-ZA/elastalert_hive_alerter.git #  Clone the Nclose Hive Alerter master branch
+ 7. python elastalert_hive_alerter/setup.py install #  Install the Nclose Hive Alerter python package
  
 ----
 
