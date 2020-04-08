@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 from mock import patch
 from elastalert.ruletypes import AnyRule
 import time
@@ -16,7 +15,8 @@ rule = {
         {'domain': '{match[some_other_domain]}'},
         {'ip': '{match[ip_address]}'},
         {'domain': '{match[nested1][nested2]}'},
-        {'other': '{match[NotInMatchData]}'}
+        # This should not result in an artifact as it is not present in the match
+        {'other': '{match[SubjectUserName]}'}
     ],
     'hive_connection': {
         'hive_password': 'password',

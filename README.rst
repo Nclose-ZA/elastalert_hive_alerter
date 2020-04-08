@@ -1,10 +1,8 @@
 Elastalert Hive Alerter
 =======================
 
-This package allows the use of a `custom Elastalert Alert
-<https://elastalert.readthedocs.io/en/latest/recipes/adding_alerts.html#adding-a-new-alerter>`_
-which creates alerts with observables in `TheHive <https://thehive-project.org/>`_ using
-`TheHive4Py <https://github.com/CERT-BDF/TheHive4py>`_.
+This package provides a `custom Elastalert Alerter
+<https://elastalert.readthedocs.io/en/latest/recipes/adding_alerts.html#adding-a-new-alerter>`_ which creates alerts with observables in `TheHive <https://thehive-project.org/>`_ using `TheHive4Py <https://github.com/CERT-BDF/TheHive4py>`_.
 
 It provides two data contexts. The "rule" context provides information about the Elastalert rule,
 eg. the rule name. The "match" context provides the data that the rule has matched.
@@ -13,20 +11,41 @@ Data from either context can be used to configure the alert and / or to create d
 
 The context data is specified via normal python string formatting (see examples below).
 
-Note: Static configuration such as hive_connection can be placed in the Elastalert config file which is processed after
-the active rule file during runtime.
+----
+
+This package also provides a `custom Elastalert Enhancement <https://elastalert.readthedocs.io/en/latest/recipes/adding_enhancements.html>`_ which will suppress alerts raised by the Alerter if a hash of the observables in the raised alert are found in the specified Elasticsearch database.
+
+The hashes should be inserted into the database from another source, most likely the ObservableHashCreator `responder <https://github.com/TheHive-Project/CortexDocs/blob/master/api/how-to-create-a-responder.md>`_ in `CortexAnalyzers <https://github.com/TheHive-Project/Cortex-Analyzers>`_
 
 ----
 
-Example usage (update your Elastalert rule / configuration file as directed below):
+Note: It is possible to place static configuration such as *hive_connection* or *es_alert_hashes_connection* in the Elastalert config file instead of the rule file.
 
-Use this package as the alert type:
+----
+
+**Installation (Debian)**
+
+::
+
+ 1. wget https://github.com/Yelp/elastalert/archive/v0.2.1.tar.gz -O - | sudo tar -xz -C /opt/elastalert # Download a stable release from the Elastalert repository and place it in whichever directory you wish. We will use /opt/elastalert for this demostration.
+ 2. sudo apt-get install python3.6-venv  # Install a virtual enviroment
+ 3. cd /opt/elastalert && python3.6 -m venv venv #  Create a virtual environment within the project directory
+ 4. . /opt/elastalert/venv/bin/activate #  Activate the virtual environment
+ 5. python setup.py install #  Install the provided Python package
+ 5. git clone https://github.com/Nclose-ZA/elastalert_hive_alerter.git #  Clone the Nclose Hive Alerter master branch
+ 5. python elastalert_hive_alerter/setup.py install #  Install the Nclose Hive Alerter python package
+ 
+----
+
+**Example Alerter usage**
+
+Set the alerter in the rule file:
 
 ::
 
  alert: "elastalert_hive_alerter.hive_alerter.HiveAlerter"
 
-You will be required to configure connection details for TheHive (required fields first) into the Elastalert config file, example below:
+Configure connection details for TheHive (required fields shown first) in either the config file or the rule file:
 
 ::
 
@@ -34,12 +53,12 @@ You will be required to configure connection details for TheHive (required field
    hive_host: http(s)://sample_host
    hive_port: <hive_port>
    hive_apikey: <hive_apikey>
-	
+
    hive_proxies:
      http: ''
      https: ''
 
-The alert should be configured by providing parameters consumed by TheHive4Py (required fields first):
+Configure the alert by providing parameters consumed by TheHive4Py (required fields shown first) in the rule file:
 
 ::
 
@@ -55,7 +74,7 @@ The alert should be configured by providing parameters consumed by TheHive4Py (r
    status: 'New'
    follow: True
 
-If desired, matched data fields can be mapped to TheHive observable types using python string formatting:
+If desired, matched data fields can be mapped to TheHive observable types using python string formatting in the rule file:
 
 ::
 
@@ -64,6 +83,31 @@ If desired, matched data fields can be mapped to TheHive observable types using 
    - domain: "{match[field]}"
    - ip: "{match[ip_field]}"
 
-Additional Documentation
---------------------------------
+**Example Enhancement usage**
+
+Set the enhancement in the rule file:
+
+::
+
+ match_enhancements:
+  - elastalert_hive_alerter.hive_alerter.HashSuppressorEnhancement
+
+Configure connection details for Elasticsearch in either the config file or the rule file:
+
+::
+
+ es_alert_hashes_connection:
+  es_host: 'localhost'
+  es_port: 9200
+  es_username:
+  es_password:
+  index: 'alert_hashes'
+  use_ssl:
+  verify_certs:
+  ca_certs:
+  client_cert:
+  client_key:
+
+**Additional Documentation**
+
 https://elastalert.readthedocs.io/en/latest/ruletypes.html#thehive
