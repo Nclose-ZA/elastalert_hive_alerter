@@ -107,6 +107,7 @@ Configure connection details for Elasticsearch in either the config file or the 
   ca_certs:
   client_cert:
   client_key:
+  hash_confirmation: False # Only enable if you know what you're doing.
 
 **Additional Documentation**
 
