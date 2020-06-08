@@ -109,6 +109,8 @@ Configure connection details for Elasticsearch in either the config file or the 
   client_key:
   hash_confirmation: False # Only enable if you know what you're doing.
 
+By setting the hash_confirmation key to True. You specify that the "found" hash document has a "enabled" boolean field. This is used if you wish to integrate a additional measure of security, such as a approval system.
+
 **Additional Documentation**
 
 https://elastalert.readthedocs.io/en/latest/ruletypes.html#thehive
