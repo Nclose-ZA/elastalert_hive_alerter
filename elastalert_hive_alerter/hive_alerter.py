@@ -88,16 +88,20 @@ class HashSuppressorEnhancement(BaseEnhancement):
             specified database
         It was written to be used in conjunction with the ObservableHashCreator responder for TheHive
         """
-
         connection_details = self.rule['es_alert_hashes_connection']
 
         kwargs = {}
-
         if connection_details.get('es_host'):
             kwargs['hosts'] = ['{}:{}'.format(connection_details['es_host'], connection_details.get('es_port', 9200))]
 
         if connection_details.get('es_username'):
             kwargs['http_auth'] = (connection_details['es_username'], connection_details['es_password'])
+
+        if connection_details.get('hash_confirmation', False):
+            hash_confirmation = True
+            elastalert_logger.info("Hash confirmation enabled. I hope you know what you're doing!")
+        else:
+            hash_confirmation = False # setting var temp
 
         kwargs.update({
             'use_ssl': connection_details.get('use_ssl', False),
@@ -113,6 +117,7 @@ class HashSuppressorEnhancement(BaseEnhancement):
 
         connections.create_connection(**kwargs)
         alert_hashes = Index(connection_details.get('index', 'alert_hashes'))
+
         alert_hashes.document(AlertHash)
         if not alert_hashes.exists():
             alert_hashes.create()
@@ -126,11 +131,18 @@ class HashSuppressorEnhancement(BaseEnhancement):
         results = AlertHash.search().filter('term', alert_hash=observable_hash).execute(ignore_cache=True)
 
         if results:
-            elastalert_logger.info('Alert was not sent because hash [{}] was found'.format(observable_hash))
-            raise DropMatchException()
+            if hash_confirmation:
+                for event in results:
+                    if event.enabled:
+                        elastalert_logger.info('Alert was not sent because hash [{}] was found and hash_confirmation is enabled'.format(observable_hash))
+                        raise DropMatchException()
+                    else:
+                        elastalert_logger.info('Alert was sent because hash [{}] was found and hash_confirmation is disabled'.format(observable_hash))
+            else:
+                elastalert_logger.info('Alert was not sent because hash [{}] was found'.format(observable_hash))
+                raise DropMatchException()
         else:
             elastalert_logger.info('Alert was sent because hash [{}] was not found'.format(observable_hash))
-
 
 class HiveAlerter(Alerter):
     """
