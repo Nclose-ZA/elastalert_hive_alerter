@@ -23,7 +23,7 @@ Note: It is possible to place static configuration such as *hive_connection* or 
 
 ----
 
-**Installation (Debian based)**
+**Installation (Debian)**
 
 ::
 
@@ -42,9 +42,10 @@ Note: It is possible to place static configuration such as *hive_connection* or 
 ::
 
  1. Copy the `thehive_suppressor`to the approriate directory on your TheHive instance (usually located in `/opt/Cortex-Analyzers/responders/ObservableHashCreator` on Docker deployments.
- 2. Log into Cortex. Navigate to `Organization`, `Responders Config` and you should see the `ObservableHashCreator` if the above was followed correctly. Configure the necessary requirements. 
+ 2. Log into Cortex. Navigate to `Organization`, `Responders Config` and you should see the `ObservableHashCreator` if the above was followed correctly. Configure the necessary requirements.
 
 ----
+
 **Example Alerter usage**
 
 Set the alerter in the rule file:
