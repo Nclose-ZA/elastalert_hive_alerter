@@ -1,0 +1,95 @@
+{
+    "name": "Alert Suppressor",
+    "version": "1.2",
+    "author": "Nclose",
+    "url": "https://github.com/TheHive-Project/Cortex-Analyzers",
+    "license": "APLv2",
+    "description": "Create MD5 hash of observables in specified Elasticsearch database",
+    "dataTypeList": ["thehive:alert"],
+    "command": "ObservableHashCreator/ObservableHashCreator.py",
+    "baseConfig": "ObservableHashCreator",
+    "configurationItems": [
+        {
+            "name": "es_host",
+            "description": "Elasticsearch host",
+            "type": "string",
+            "multi": false,
+            "required": true
+        },
+        {
+            "name": "es_port",
+            "description": "Elasticsearch port",
+            "type": "string",
+            "multi": false,
+            "required": false,
+            "defaultValue": "9200"
+        },
+        {
+            "name": "es_username",
+            "description": "Elasticsearch username",
+            "type": "string",
+            "multi": false,
+            "required": false
+        },
+        {
+            "name": "es_password",
+            "description": "Elasticsearch password",
+            "type": "string",
+            "multi": false,
+            "required": false
+        },
+        {
+            "name": "es_index",
+            "description": "Elasticsearch index",
+            "type": "string",
+            "multi": false,
+            "required": false,
+            "defaultValue": "alert_hashes"
+        },
+        {
+            "name": "es_use_ssl",
+            "description": "Use SSL",
+            "type": "boolean",
+            "multi": false,
+            "required": false,
+            "defaultValue": false
+        },
+        {
+            "name": "es_verify_certs",
+            "description": "Verify certificates",
+            "type": "boolean",
+            "multi": false,
+            "required": false,
+            "defaultValue": false
+        },
+        {
+            "name": "es_client_cert",
+            "description": "Client certificate path",
+            "type": "string",
+            "multi": false,
+            "required": false
+        },
+        {
+            "name": "es_client_key",
+            "description": "Client key path",
+            "type": "string",
+            "multi": false,
+            "required": false
+        },
+        {
+            "name": "es_ca_certs",
+            "description": "CA certificates path",
+            "type": "string",
+            "multi": false,
+            "required": false
+        },
+        {
+            "name": "es_timeout",
+            "description": "Timeout",
+            "type": "number",
+            "multi": false,
+            "required": false,
+            "defaultValue": 20
+        }
+    ]
+}
