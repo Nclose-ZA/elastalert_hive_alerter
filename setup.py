@@ -15,7 +15,7 @@ setup(
       ],
       keywords='elasticsearch elastalert thehive',
       packages=['elastalert_hive_alerter'],
-      install_requires=['elastalert', 'thehive4py', 'elasticsearch_dsl'],
+      install_requires=['elastalert', 'thehive4py==1.6.0', 'elasticsearch_dsl'],
       test_suite='nose.collector',
       tests_require=['nose']
 )
