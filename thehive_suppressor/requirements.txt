@@ -1,3 +1,2 @@
-cortexutils
-elasticsearch-dsl>=6.0.0,<7.0.0
-thehive4py
+elasticsearch-dsl==7.3.0
+thehive4py==1.8.1

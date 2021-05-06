@@ -14,3 +14,6 @@
 # IDE project metadtaa
 /.idea/
 .vscode/
+Pipfile
+Pipfile.lock
+tox.ini

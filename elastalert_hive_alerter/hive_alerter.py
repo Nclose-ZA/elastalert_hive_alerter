@@ -12,12 +12,6 @@ from thehive4py.api import TheHiveApi
 from thehive4py.models import Alert, AlertArtifact, CustomFieldHelper, JSONSerializable, CustomJsonEncoder
 
 
-# Monkey patch jsonify as the indent keyword results in different hashes between python 2 & 3
-def jsonify(self):
-    return json.dumps(self, sort_keys=True, cls=CustomJsonEncoder)
-JSONSerializable.jsonify = jsonify
-
-
 elastalert_logger = logging.getLogger('elastalert')
 
 
@@ -52,7 +46,7 @@ def _create_alert_config(rule, match):
     }
 
     alert_config.update(rule.get('hive_alert_config', {}))
-
+    
     for alert_config_field, alert_config_value in alert_config.items():
         if alert_config_field == 'customFields':
             custom_fields = CustomFieldHelper()
@@ -88,7 +82,7 @@ class HashSuppressorEnhancement(BaseEnhancement):
             specified database
         It was written to be used in conjunction with the ObservableHashCreator responder for TheHive
         """
-
+        
         connection_details = self.rule['es_alert_hashes_connection']
 
         kwargs = {}
@@ -154,7 +148,10 @@ class HiveAlerter(Alerter):
             cert=connection_details.get('hive_verify', False))
 
         alert = Alert(**alert_config)
-        response = api.create_alert(alert)
+        try:
+            response = api.create_alert(alert)
+        except Exception as e:
+            elastalert_logger.warning("Error connecting to theHive. ERROR: ".format(e))
 
         if response.status_code != 201:
             raise Exception('alert not successfully created in TheHive\n{}'.format(response.text))
