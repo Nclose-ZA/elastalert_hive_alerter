@@ -9,20 +9,20 @@
 - [Additional Documentation](#Additional-Documentation)
 
 ## About
+- This package is an enhancement addon to Elastalert 2 <https://github.com/jertel/elastalert2>
+- It provides a custom `Elastalert Alerter`
+<https://elastalert2.readthedocs.io/en/latest/recipes/adding_alerts.html#adding-a-new-alerter> which creates alerts with observables in TheHive <https://thehive-project.org/> using `TheHive4Py` <https://github.com/TheHive-Project/TheHive4py>.
 
-This package provides a custom `Elastalert Alerter`
-<https://elastalert.readthedocs.io/en/latest/recipes/adding_alerts.html#adding-a-new-alerter> which creates alerts with observables in TheHive <https://thehive-project.org/> using `TheHive4Py` <https://github.com/TheHive-Project/TheHive4py>.
-
-It provides two data contexts. The "rule" context provides information about the Elastalert rule,
+- It provides two data contexts. The "rule" context provides information about the Elastalert rule,
 eg. the rule name. The "match" context provides the data that the rule has matched.
 
-Data from either context can be used to configure the alert and / or to create data for an observable.
+- Data from either context can be used to configure the alert and / or to create data for an observable.
 
-The context data is specified via normal python string formatting (see examples below).
+- The context data is specified via normal python string formatting (see examples below).
 
 ----
 
-This package also provides a `custom Elastalert Enhancement` <https://elastalert.readthedocs.io/en/latest/recipes/adding_enhancements.html> which will suppress alerts raised by the Alerter if a hash of the observables in the raised alert is found in the specified Elasticsearch database.
+This package also provides a `custom Elastalert Enhancement` <https://elastalert2.readthedocs.io/en/latest/recipes/adding_enhancements.html> which will suppress alerts raised by the Alerter if a hash of the observables in the raised alert is found in the specified Elasticsearch database.
 
 The hashes should be inserted into the database from another source, most likely the ObservableHashCreator `responder` <https://github.com/TheHive-Project/CortexDocs/blob/master/api/how-to-create-a-responder.md> in `CortexAnalyzers` <https://github.com/TheHive-Project/Cortex-Analyzers>
 
@@ -137,4 +137,4 @@ If you already have Elastalert2 running you can just follow steps 3 and 4.
 
 ## Additional Documentation
 
-https://elastalert.readthedocs.io/en/latest/ruletypes.html#thehive
+https://elastalert2.readthedocs.io/en/latest/
